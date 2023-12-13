@@ -1,7 +1,7 @@
+require('dotenv').config()
+const db = require('./../database/connection.ts')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-
-const db = require('./../database/connection.ts')
 
 exports.getUserById = (req, res) => {
   const { id } = req.params
@@ -11,9 +11,11 @@ exports.getUserById = (req, res) => {
     return
   }
 
-  const getUserByIdQuery = `SELECT * FROM brushrythm_development.users WHERE id = ${id};`
+  const getUserByIdQuery = `SELECT * FROM ${process.env.DB_NAME}.users WHERE id = ?`
 
-  db.query(getUserByIdQuery, (err, user) => {
+  const preparedQuery = db.format(getUserByIdQuery, id)
+
+  db.query(preparedQuery, (err, user) => {
     if (err) {
       res.status(400).send(err)
       return
@@ -36,9 +38,11 @@ exports.login = (req, res) => {
   }
 
   /** TODO: add username to be used */
-  const getUserByIdQuery = `SELECT * FROM brushrythm_development.users WHERE email = '${email}';`
+  const loginQuery = `SELECT * FROM ${process.env.DB_NAME}.users WHERE email = ?;`
 
-  db.query(getUserByIdQuery, (err, result) => {
+  const preparedQuery = db.format(loginQuery, email)
+
+  db.query(preparedQuery, (err, result) => {
     if (err) {
       res.status(400).send(err)
       return
@@ -80,11 +84,18 @@ exports.signup = (req, res) => {
 
   /** password "salted" 10 times */
   bcrypt.hash(password, 10).then((hash) => {
-    const addUserQuery =
-      'INSERT INTO `brushrythm_development`.`users` (`age`, `name`, `username`, `email`, `password`, `streak`, `experience`, `gems`, `breaks`, `morning_bonus`, `evening_bonus`, `bonuses`, `quests_completed`, `month`) ' +
-      `VALUES ('${age}', '${name}', '${username}', '${email}', '${hash}', '0', '0', '0', '0', '0', '0', '0', '0', '${month}');`
+    const table = `INSERT INTO ${process.env.DB_NAME}.users `
+    const columns =
+      '(`age`, `name`, `username`, `email`, `password`, `streak`, `experience`, `gems`, `breaks`, `morning_bonus`, `evening_bonus`, `bonuses`, `quests_completed`, `month`) '
+    const values = `VALUES (?, ?, ?, ?, ?, '0', '0', '0', '0', '0', '0', '0', '0', ?);`
 
-    db.query(addUserQuery, (err, result) => {
+    const signupQuery = table + columns + values
+
+    const inserts = [age, name, username, email, hash, month]
+
+    const preparedQuery = db.format(signupQuery, inserts)
+
+    db.query(preparedQuery, (err, result) => {
       if (err) {
         res.status(400).send(err)
         return
@@ -101,3 +112,4 @@ exports.signup = (req, res) => {
 }
 
 // TODO: add update user
+// UPDATE `brushrythm_development`.`users` SET `gems` = '50' WHERE (`id` = '3');

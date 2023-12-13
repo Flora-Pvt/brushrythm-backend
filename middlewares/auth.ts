@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken')
+
 /** for authentication : compare token id and user id */
 module.exports = (req, res, next) => {
   try {

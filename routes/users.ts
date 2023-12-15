@@ -9,5 +9,6 @@ router.post('/signup', limiter, userCtrl.signup)
 router.post('/login', limiter, userCtrl.login)
 
 router.get('/:id', auth, userCtrl.getUserById)
+router.patch('/:id', auth, userCtrl.updateUser)
 
 module.exports = router

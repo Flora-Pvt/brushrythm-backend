@@ -1,3 +1,4 @@
+import { Request, Response, NextFunction } from 'express'
 const express = require('express')
 const app = express()
 const PORT = 8080
@@ -10,7 +11,7 @@ app.listen(PORT, () => {
 require('./database/connection.ts')
 
 /* -- configure request headers -- */
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader(
     'Access-Control-Allow-Headers',

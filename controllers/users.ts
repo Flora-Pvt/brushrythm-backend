@@ -73,7 +73,7 @@ exports.login = (req: Request, res: Response) => {
 }
 
 exports.signup = (req: Request, res: Response) => {
-  const { age, name, username, email, password, month } = req.body
+  const { age, name, username, email, password } = req.body
 
   /** TODO: add valid email and strong password requirement */
   if (!username && !email) {
@@ -89,12 +89,12 @@ exports.signup = (req: Request, res: Response) => {
   bcrypt.hash(password, 10).then((hash: Response) => {
     const table = `INSERT INTO ${process.env.DB_NAME}.users `
     const columns =
-      '(`age`, `name`, `username`, `email`, `password`, `streak`, `experience`, `gems`, `breaks`, `morning_bonus`, `evening_bonus`, `bonuses`, `quests_completed`, `month`) '
-    const values = `VALUES (?, ?, ?, ?, ?, '0', '0', '0', '0', '0', '0', '0', '0', ?);`
+      '(`age`, `name`, `username`, `email`, `password`, `streak`, `experience`, `gems`, `breaks`, `morning_bonus`, `evening_bonus`, `bonuses`, `quests_completed`) '
+    const values = `VALUES (?, ?, ?, ?, ?, '0', '0', '0', '0', '0', '0', '0', '0');`
 
     const signupQuery = table + columns + values
 
-    const inserts = [age, name, username, email, hash, month]
+    const inserts = [age, name, username, email, hash]
 
     const preparedQuery = db.format(signupQuery, inserts)
 
@@ -125,6 +125,7 @@ exports.updateUser = (req: Request, res: Response) => {
     'name',
     'username',
     'email',
+    'path',
     'streak',
     'experience',
     'gems',
@@ -133,7 +134,8 @@ exports.updateUser = (req: Request, res: Response) => {
     'evening_bonus',
     'bonuses',
     'quests_completed',
-    'month',
+    'last_exercise_date',
+    'exercises_completed',
   ]
 
   let updates: string[] = []
